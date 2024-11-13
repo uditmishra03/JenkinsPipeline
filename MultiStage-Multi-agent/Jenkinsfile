@@ -1,21 +1,29 @@
-pipeline {
-  agent none
-  stages {
-    stage('Back-end') {
-      agent {
-        docker { image 'maven:3.8.1-adoptopenjdk-11' }
+  pipeline {
+    agent any
+    stages {
+      stage('Build') {
+        steps {
+          checkout scm
+          sh 'mvn clean package' // Build the backend with Maven
+        }
       }
-      steps {
-        sh 'mvn --version'
+      stage('Build Frontend') {
+        steps {
+          sh 'cd frontend && npm install && npm run build' // Build the React frontend
+        }
       }
-    }
-    stage('Front-end') {
-      agent {
-        docker { image 'node:16-alpine' }
+      stage('Docker Build') {
+        steps {
+          sh 'docker build -t my-app .' // Build the Docker image
+        }
       }
-      steps {
-        sh 'node --version'
+      stage('Docker Push') {
+        steps {
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD']]) {
+            sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD' // Log in to Docker Hub
+          }
+          sh 'docker push my-app' // Push the Docker image to the registry
+        }
       }
     }
   }
-}
