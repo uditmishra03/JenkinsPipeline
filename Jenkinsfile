@@ -8,6 +8,41 @@ pipeline {
     }
 
     stages {
+            stage('Install Docker CLI') {
+
+                steps {
+
+                    script {
+
+                        // Install Docker CLI if not already installed (example for Linux)
+
+                        sh '''
+
+                        if ! command -v docker --version &> /dev/null
+
+                        then
+
+                        sudo apt update
+
+                        curl -fsSL https get docker com -o get-docker.sh
+
+                        sudo sh get-docker.sh
+
+                        else
+
+                        echo "Docker is already installed."
+
+                        fi
+
+                        sudo dockerd --ip6tables=false &
+
+                        '''
+
+                    }
+
+                }
+
+        }
         stage('Checkout') {
             steps {
                 checkout scm  // This checks out the code from your repository
